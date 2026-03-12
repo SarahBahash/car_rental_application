@@ -1,0 +1,25 @@
+2026-03-09T23:11:58.801789200 : User search passengers=4 days=5 mileage=3000.0
+2026-03-09T23:12:23.090124600 : User search passengers=7 days=5 mileage=3000.0
+2026-03-09T23:15:24.080603100 : User search passengers=2 days=5 mileage=3000.0
+2026-03-09T23:15:30.490889300 : User search passengers=1 days=5 mileage=3000.0
+2026-03-09T23:15:37.807447200 : User search passengers=1 days=3 mileage=3000.0
+2026-03-09T23:15:38.994044100 : User search passengers=1 days=3 mileage=3000.0
+2026-03-09T23:15:43.468627700 : User search passengers=2 days=3 mileage=3000.0
+2026-03-09T23:15:48.863632800 : User search passengers=2 days=3 mileage=30.0
+2026-03-09T23:21:19.859092400 : User search passengers=2 days=3 mileage=30.0
+2026-03-09T23:21:20.066191700 : User search passengers=2 days=3 mileage=30.0
+2026-03-09T23:32:38.636443400 : User search passengers=2 days=3 mileage=30.0
+2026-03-09T23:41:47.930872100 : Search: passengers=2 days=2 mileage=3000.0
+2026-03-09T23:41:49.183264700 : Search: passengers=2 days=2 mileage=3000.0
+2026-03-09T23:42:01.032883200 : Search: passengers=2 days=2 mileage=30.0
+2026-03-12T23:12:37.525701300 : Search: passengers=2 days=2 mileage=23.0
+2026-03-12T23:12:38.477997 : Search: passengers=2 days=2 mileage=23.0
+2026-03-12T23:25:41.218328500 : Admin logged in
+2026-03-12T23:25:46.711742400 : User logout
+2026-03-12T23:25:55.548432500 : User logged in
+2026-03-12T23:26:04.097109700 : Invalid input attempt
+2026-03-12T23:26:09.327239200 : Search: passengers=2 days=2 mileage=234.0
+2026-03-12T23:26:10.108492400 : Search: passengers=2 days=2 mileage=234.0
+2026-03-12T23:27:57.382796700 : User logout
+2026-03-12T23:38:13.321770 : User logged in
+2026-03-12T23:39:47.772097500 : Admin logged in
