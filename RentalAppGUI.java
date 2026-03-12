@@ -18,10 +18,12 @@ public class RentalAppGUI extends JFrame {
     JTextField mileageField = new JTextField();
 
     JPanel carsPanel;
+    boolean isAdmin;
 
     java.util.List<Car> cars = new ArrayList<>();
 
     public RentalAppGUI(boolean admin){
+        this.isAdmin = admin;
 
         setTitle("Car Rental Dashboard");
         setSize(1100,650);
@@ -42,27 +44,43 @@ public class RentalAppGUI extends JFrame {
 
     private void createHeader(){
 
-        JPanel header = new JPanel(new BorderLayout());
+    JPanel header = new JPanel(new BorderLayout());
 
-        header.setBackground(new Color(25,90,180));
-        header.setPreferredSize(new Dimension(100,70));
+    header.setBackground(new Color(25,90,180));
+    header.setPreferredSize(new Dimension(100,70));
 
-        JLabel title = new JLabel(" CAR RENTAL SYSTEM");
-        title.setForeground(Color.WHITE);
-        title.setFont(new Font("Segoe UI",Font.BOLD,26));
+    JLabel title = new JLabel(" CAR RENTAL SYSTEM");
+    title.setForeground(Color.WHITE);
+    title.setFont(new Font("Segoe UI",Font.BOLD,26));
 
-        JButton logout = new JButton("Logout");
+    JPanel rightPanel = new JPanel();
+    rightPanel.setBackground(new Color(25,90,180));
 
-        logout.addActionListener(e -> {
-            dispose();
-            new LoginWindow();
-        });
+    if(isAdmin){
 
-        header.add(title,BorderLayout.WEST);
-        header.add(logout,BorderLayout.EAST);
+        JButton adminBtn = new JButton("Admin Panel");
 
-        add(header,BorderLayout.NORTH);
+        adminBtn.addActionListener(e -> new AdminPanel());
+
+        rightPanel.add(adminBtn);
     }
+
+    JButton logout = new JButton("Logout");
+
+    logout.addActionListener(e -> {
+
+        dispose();
+        new LoginWindow();
+
+    });
+
+    rightPanel.add(logout);
+
+    header.add(title,BorderLayout.WEST);
+    header.add(rightPanel,BorderLayout.EAST);
+
+    add(header,BorderLayout.NORTH);
+}
 
     private void createSidebar(){
 
@@ -231,35 +249,44 @@ public class RentalAppGUI extends JFrame {
 
     private void filterCars(){
 
-        try{
+    try{
 
-            int passengers =
-                    Integer.parseInt(passengersField.getText());
+        int passengers = SecurityValidator.validatePassengers(
+                Integer.parseInt(passengersField.getText()));
 
-            java.util.List<Car> filtered = new ArrayList<>();
+        int days = SecurityValidator.validateDays(
+                Integer.parseInt(daysField.getText()));
 
-            for(Car car : cars){
+        double mileage = SecurityValidator.validateMileage(
+                Double.parseDouble(mileageField.getText()));
 
-                if(car.getMaxPassengers() >= passengers)
+        List<Car> bestCars =
+                RentalCalculator.findBestCar(cars, passengers, days, mileage);
 
-                    filtered.add(car);
+        if(bestCars.isEmpty()){
 
-            }
+            JOptionPane.showMessageDialog(this,
+                    "No cars available for this passenger number");
 
-            carsPanel.removeAll();
+            return;
+        }
 
-            for(Car car : filtered)
+        carsPanel.removeAll();
 
-                carsPanel.add(createCarCard(car));
+        for(Car car : bestCars){
 
-            carsPanel.revalidate();
-            carsPanel.repaint();
+            carsPanel.add(createCarCard(car));
 
         }
-        catch(Exception e){
 
-            JOptionPane.showMessageDialog(this,"Enter valid numbers");
+        carsPanel.revalidate();
+        carsPanel.repaint();
 
-        }
     }
+    catch(Exception e){
+
+        JOptionPane.showMessageDialog(this,e.getMessage());
+
+    }
+}
 }
