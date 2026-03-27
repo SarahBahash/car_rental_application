@@ -54,8 +54,11 @@ public class CarCard extends JPanel {
 
         try{
 
-            int days = Integer.parseInt(daysField.getText());
-            double mileage = Double.parseDouble(mileageField.getText());
+            int days = SecurityValidator.validateDays(
+                    Integer.parseInt(daysField.getText()));
+
+            double mileage = SecurityValidator.validateMileage(
+                    Double.parseDouble(mileageField.getText()));
 
             double gasPrice = 2.25;
 
@@ -63,17 +66,27 @@ public class CarCard extends JPanel {
             double gas = car.gasCost(mileage, gasPrice);
             double total = rental + gas;
 
-            // Receipt panel
-            JPanel receipt = new JPanel(new GridLayout(8,1,5,5));
+            // ===== Receipt UI =====
+            JPanel receipt = new JPanel(new GridLayout(12,1,5,5));
 
-            receipt.add(new JLabel("Car: " + car.getName()));
+            receipt.add(new JLabel("🚗 Car: " + car.getName()));
             receipt.add(new JLabel("Category: " + car.getCategory()));
-            receipt.add(new JLabel("------------------------"));
+            receipt.add(new JLabel("Passengers: " + car.getMaxPassengers()));
+
+            receipt.add(new JLabel("-----------------------------"));
+
             receipt.add(new JLabel("Days: " + days));
-            receipt.add(new JLabel("Mileage: " + mileage));
-            receipt.add(new JLabel("Rental: $" + String.format("%.2f", rental)));
-            receipt.add(new JLabel("Fuel: $" + String.format("%.2f", gas)));
-            receipt.add(new JLabel("Total: $" + String.format("%.2f", total)));
+            receipt.add(new JLabel("Mileage: " + mileage + " miles"));
+            receipt.add(new JLabel("Price/Day: $" + car.rentalCost(1)));
+
+            receipt.add(new JLabel("-----------------------------"));
+
+            receipt.add(new JLabel("Rental Cost: $" + String.format("%.2f", rental)));
+            receipt.add(new JLabel("Fuel Cost: $" + String.format("%.2f", gas)));
+
+            receipt.add(new JLabel("-----------------------------"));
+
+            receipt.add(new JLabel("TOTAL: $" + String.format("%.2f", total)));
 
             int choice = JOptionPane.showConfirmDialog(
                     this,
@@ -83,12 +96,19 @@ public class CarCard extends JPanel {
                     JOptionPane.INFORMATION_MESSAGE
             );
 
+            // ===== AFTER CONFIRM =====
             if(choice == JOptionPane.OK_OPTION){
 
-                // ✅ SUCCESS POPUP
+                String bookingID = "BK" + System.currentTimeMillis();
+
+                SecureLogger.log("Booking confirmed: " + bookingID + " | " + car.getName());
+
                 JOptionPane.showMessageDialog(
                         this,
-                        "✅ Booking Confirmed!",
+                        "✅ Booking Confirmed!\n\n" +
+                        "Car: " + car.getName() + "\n" +
+                        "Total Paid: $" + String.format("%.2f", total) + "\n" +
+                        "Booking ID: " + bookingID,
                         "Success",
                         JOptionPane.INFORMATION_MESSAGE
                 );
@@ -98,7 +118,7 @@ public class CarCard extends JPanel {
         catch(Exception e){
 
             JOptionPane.showMessageDialog(this,
-                    "Please enter valid Days and Mileage first");
+                    "❌ Please enter valid Days and Mileage");
 
         }
     }
