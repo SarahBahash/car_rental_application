@@ -57,6 +57,44 @@ public class DatabaseManager {
         return null;
     }
 
+    // Checks whether a username already exists
+    public static boolean userExists(String username) {
+        String sql = "SELECT 1 FROM users WHERE username = ?";
+
+        try (Connection conn = DriverManager.getConnection(URL);
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, username);
+            ResultSet rs = pstmt.executeQuery();
+
+            return rs.next();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+    // Registers a new user with the default role "User"
+    public static boolean registerUser(String username, String password) {
+        String sql = "INSERT INTO users (username, password, role) VALUES (?, ?, 'User')";
+
+        try (Connection conn = DriverManager.getConnection(URL);
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, username);
+            pstmt.setString(2, password);
+
+            return pstmt.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
     // Stores security-related events in the logs table
     public static void insertLog(String user, String action) {
         String sql = "INSERT INTO logs (user, action) VALUES (?, ?)";
@@ -119,6 +157,7 @@ public class DatabaseManager {
     public static List<String[]> getAllBookings() {
         List<String[]> bookings = new ArrayList<>();
         String sql = "SELECT booking_id, username, car_name, total_price FROM bookings ORDER BY id DESC";
+
         try (Connection conn = DriverManager.getConnection(URL);
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {

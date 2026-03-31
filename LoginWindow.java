@@ -27,7 +27,7 @@ public class LoginWindow extends JFrame {
         JPanel loginCard = new JPanel();
         loginCard.setLayout(new BoxLayout(loginCard, BoxLayout.Y_AXIS));
         loginCard.setOpaque(false);
-        loginCard.setPreferredSize(new Dimension(350, 500));
+        loginCard.setPreferredSize(new Dimension(350, 520));
 
         JLabel title = new JLabel("DRIVE ELITE");
         title.setFont(new Font("Segoe UI", Font.BOLD, 36));
@@ -56,21 +56,22 @@ public class LoginWindow extends JFrame {
         styleField(passwordField);
         loginCard.add(passwordField);
 
-        loginCard.add(Box.createRigidArea(new Dimension(0, 45)));
+        loginCard.add(Box.createRigidArea(new Dimension(0, 35)));
 
         JButton loginBtn = new JButton("LOGIN TO SYSTEM");
-        loginBtn.setFont(new Font("Segoe UI", Font.BOLD, 15));
-        loginBtn.setBackground(ACCENT_ORANGE);
-        loginBtn.setForeground(Color.BLACK);
-        loginBtn.setFocusPainted(false);
-        loginBtn.setBorderPainted(false);
-        loginBtn.setOpaque(true);
-        loginBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        loginBtn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 55));
-        loginBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
+        styleButton(loginBtn);
         loginBtn.addActionListener(e -> authenticate());
-
         loginCard.add(loginBtn);
+
+        loginCard.add(Box.createRigidArea(new Dimension(0, 15)));
+
+        JButton registerBtn = new JButton("CREATE ACCOUNT");
+        styleButton(registerBtn);
+        registerBtn.addActionListener(e -> {
+            new RegisterWindow();
+            this.dispose();
+        });
+        loginCard.add(registerBtn);
 
         mainPanel.add(loginCard);
         setVisible(true);
@@ -98,7 +99,19 @@ public class LoginWindow extends JFrame {
         field.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
     }
 
-    // Handles user authentication and logs login events
+    private void styleButton(JButton button) {
+        button.setFont(new Font("Segoe UI", Font.BOLD, 15));
+        button.setBackground(ACCENT_ORANGE);
+        button.setForeground(Color.BLACK);
+        button.setFocusPainted(false);
+        button.setBorderPainted(false);
+        button.setOpaque(true);
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        button.setMaximumSize(new Dimension(Integer.MAX_VALUE, 55));
+        button.setAlignmentX(Component.CENTER_ALIGNMENT);
+    }
+
+    // Handles user authentication
     private void authenticate() {
         String user = usernameField.getText().trim();
         String pass = new String(passwordField.getPassword());
