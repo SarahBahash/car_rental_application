@@ -133,12 +133,12 @@ public class RentalAppGUI extends JFrame {
 
     private void initializeCars(){
 
-        cars.add(new Car("2026 Honda CR-V","SUV",5,3,55,30,"images/crv.jpg"));
-        cars.add(new Car("2024 Ford Edge","Crossover",5,3,55,23,"images/edge.jpg"));
-        cars.add(new Car("2026 Honda Accord","Sedan",4,2,50,33,"images/accord.jpeg"));
-        cars.add(new Car("2026 Ford F150","Truck",5,3,55,23,"images/f150.jpg"));
-        cars.add(new Car("Chevrolet Corvette","Coupe",2,1,45,19,"images/corvette.jpg"));
-        cars.add(new Car("Lexus RX Hybrid","Hybrid",5,2,60,36,"images/rx.jpg"));
+        cars.add(new Car("2026 Honda CR-V","SUV",5,3,55,29,"images/crv.jpg"));
+        cars.add(new Car("2024 Ford Edge","Crossover",5,3,55,22,"images/edge.jpg"));
+        cars.add(new Car("2026 Honda Accord","Sedan",4,2,50,32,"images/accord.jpeg"));
+        cars.add(new Car("2026 Ford F150","Truck",5,3,55,17.5,"images/f150.jpg"));
+        cars.add(new Car("Chevrolet Corvette","Coupe",2,1,45,16.5,"images/corvette.jpg"));
+        cars.add(new Car("Lexus RX Hybrid","Hybrid",5,2,60,30,"images/rx.jpg"));
         cars.add(new Car("Toyota Sienna","Minivan",7,2,70,36,"images/sienna.jpg"));
     }
 
