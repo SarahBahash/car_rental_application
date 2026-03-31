@@ -1,125 +1,172 @@
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.awt.event.ActionListener;
+import java.io.File;
 
 public class CarCard extends JPanel {
 
-    private Car car;
-    private JTextField daysField;
-    private JTextField mileageField;
+    private final Color COLOR_PRIMARY = new Color(15, 23, 42);
+    private final Color COLOR_ACCENT = new Color(249, 115, 22);
+    private final Color COLOR_SUBTEXT = new Color(100, 116, 139);
+    private final int ROUNDNESS = 30;
 
-    public CarCard(Car car, JTextField daysField, JTextField mileageField){
+    // Constructor: receives car data and calculated total cost
+    public CarCard(Car car, double calculatedTotal, ActionListener onBook) {
+        setLayout(new BorderLayout(0, 10));
+        setOpaque(false);
+        setPreferredSize(new Dimension(320, 500));
+        setBorder(new EmptyBorder(18, 18, 18, 18));
 
-        this.car = car;
-        this.daysField = daysField;
-        this.mileageField = mileageField;
+        // --- Image Section ---
+        JLabel imgLabel = new JLabel();
+        try {
+            ImageIcon icon = new ImageIcon(new File(car.getImagePath()).getAbsolutePath());
+            Image img = icon.getImage().getScaledInstance(280, 145, Image.SCALE_SMOOTH);
+            imgLabel.setIcon(new ImageIcon(img));
+        } catch (Exception e) {
+            imgLabel.setText("📷 No Image Found");
+        }
+        imgLabel.setHorizontalAlignment(JLabel.CENTER);
+        add(imgLabel, BorderLayout.NORTH);
 
-        setLayout(new BorderLayout());
-        setBorder(BorderFactory.createLineBorder(new Color(180,200,230)));
-        setPreferredSize(new Dimension(240,300));
-        setBackground(Color.WHITE);
+        // --- Info Section ---
+        JPanel infoPanel = new JPanel();
+        infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
+        infoPanel.setOpaque(false);
 
-        // ===== TITLE =====
-        JLabel title = new JLabel(car.getName(),JLabel.CENTER);
-        title.setFont(new Font("Segoe UI",Font.BOLD,14));
+        // Shows type (Economy, Standard...) and category (SUV, Sedan...)
+        JLabel categoryTag = new JLabel("  " + car.getType().toUpperCase() + " • " + car.getCategory().toUpperCase() + "  ");
+        categoryTag.setOpaque(true);
+        categoryTag.setBackground(new Color(37, 99, 235, 15));
+        categoryTag.setForeground(new Color(37, 99, 235));
+        categoryTag.setFont(new Font("Segoe UI", Font.BOLD, 10));
+        categoryTag.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        // ===== IMAGE =====
-        ImageIcon icon = new ImageIcon(car.getImagePath());
-        Image img = icon.getImage().getScaledInstance(200,120,Image.SCALE_SMOOTH);
-        JLabel image = new JLabel(new ImageIcon(img));
-        image.setHorizontalAlignment(JLabel.CENTER);
+        // Car name
+        JLabel nameLabel = new JLabel(car.getName());
+        nameLabel.setFont(new Font("Segoe UI", Font.BOLD, 22));
+        nameLabel.setForeground(COLOR_PRIMARY);
+        nameLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        // ===== INFO =====
-        JPanel info = new JPanel(new GridLayout(3,1));
-        info.setBackground(Color.WHITE);
+        // Comfort badge (Poor / Medium / Good)
+        JPanel comfortBadge = createComfortBadge(car.getComfortLevel());
+        comfortBadge.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        info.add(new JLabel("Category: "+car.getCategory()));
-        info.add(new JLabel("Passengers: "+car.getMaxPassengers()));
-        info.add(new JLabel("Comfort: "+car.getComfortLevel()));
+        // Specs: passengers + MPG
+        JLabel specsLabel = new JLabel("<html><body style='font-family: Segoe UI; color: #64748b; font-size: 11px;'>" +
+                "<table width='240' cellpadding='0' cellspacing='0'>" +
+                "<tr>" +
+                "<td width='45%' align='right'>👤 <b style='color:#1e293b;'>" + car.getMaxPassengers() + "</b> Max Seats</td>" +
+                "<td width='10%' align='center'>&nbsp;•&nbsp;</td>" +
+                "<td width='45%' align='left'>⛽ <b style='color:#1e293b;'>" + car.getMpg() + "</b> MPG</td>" +
+                "</tr></table>" +
+                "</body></html>");
+        specsLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        // ===== BUTTON =====
-        JButton select = new JButton("Select Car");
-        select.setBackground(new Color(40,120,220));
-        select.setForeground(Color.WHITE);
+        // Price display (daily or total trip)
+        JPanel priceContainer = new JPanel(new FlowLayout(FlowLayout.LEFT, 2, 0));
+        priceContainer.setOpaque(false);
+        priceContainer.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        select.addActionListener(e -> showReceipt());
+        if (calculatedTotal > 0) {
+            JLabel totalLabel = new JLabel("Total Trip: ");
+            totalLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+            totalLabel.setForeground(COLOR_SUBTEXT);
 
-        add(title,BorderLayout.NORTH);
-        add(image,BorderLayout.CENTER);
-        add(info,BorderLayout.WEST);
-        add(select,BorderLayout.SOUTH);
+            JLabel totalValue = new JLabel("$" + String.format("%.2f", calculatedTotal));
+            totalValue.setFont(new Font("Segoe UI", Font.BOLD, 28));
+            totalValue.setForeground(COLOR_ACCENT);
+
+            priceContainer.add(totalLabel);
+            priceContainer.add(totalValue);
+        } else {
+            JLabel priceValue = new JLabel("$" + (int) car.getPriceDay());
+            priceValue.setFont(new Font("Segoe UI", Font.BOLD, 32));
+            priceValue.setForeground(COLOR_PRIMARY);
+
+            JLabel perDayLabel = new JLabel(" / day");
+            perDayLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+            perDayLabel.setForeground(COLOR_SUBTEXT);
+
+            priceContainer.add(priceValue);
+            priceContainer.add(perDayLabel);
+        }
+
+        infoPanel.add(categoryTag);
+        infoPanel.add(Box.createRigidArea(new Dimension(0, 8)));
+        infoPanel.add(nameLabel);
+        infoPanel.add(Box.createRigidArea(new Dimension(0, 5)));
+        infoPanel.add(comfortBadge);
+        infoPanel.add(Box.createRigidArea(new Dimension(0, 15)));
+        infoPanel.add(specsLabel);
+        infoPanel.add(Box.createRigidArea(new Dimension(0, 20)));
+        infoPanel.add(priceContainer);
+
+        add(infoPanel, BorderLayout.CENTER);
+
+        // Booking button
+        JButton bookBtn = new JButton("Confirm Booking");
+        bookBtn.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        bookBtn.setForeground(Color.WHITE);
+        bookBtn.setBackground(COLOR_ACCENT);
+        bookBtn.setFocusPainted(false);
+        bookBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        bookBtn.setPreferredSize(new Dimension(0, 48));
+        bookBtn.addActionListener(onBook);
+
+        add(bookBtn, BorderLayout.SOUTH);
     }
 
-    // ===== RECEIPT POPUP =====
-    private void showReceipt(){
+    // Creates colored badge based on comfort level
+    private JPanel createComfortBadge(int level) {
+        String text;
+        Color bg, fg;
 
-        try{
-
-            int days = SecurityValidator.validateDays(
-                    Integer.parseInt(daysField.getText()));
-
-            double mileage = SecurityValidator.validateMileage(
-                    Double.parseDouble(mileageField.getText()));
-
-            double gasPrice = 2.25;
-
-            double rental = car.rentalCost(days);
-            double gas = car.gasCost(mileage, gasPrice);
-            double total = rental + gas;
-
-            // ===== Receipt UI =====
-            JPanel receipt = new JPanel(new GridLayout(12,1,5,5));
-
-            receipt.add(new JLabel("🚗 Car: " + car.getName()));
-            receipt.add(new JLabel("Category: " + car.getCategory()));
-            receipt.add(new JLabel("Passengers: " + car.getMaxPassengers()));
-
-            receipt.add(new JLabel("-----------------------------"));
-
-            receipt.add(new JLabel("Days: " + days));
-            receipt.add(new JLabel("Mileage: " + mileage + " miles"));
-            receipt.add(new JLabel("Price/Day: $" + car.rentalCost(1)));
-
-            receipt.add(new JLabel("-----------------------------"));
-
-            receipt.add(new JLabel("Rental Cost: $" + String.format("%.2f", rental)));
-            receipt.add(new JLabel("Fuel Cost: $" + String.format("%.2f", gas)));
-
-            receipt.add(new JLabel("-----------------------------"));
-
-            receipt.add(new JLabel("TOTAL: $" + String.format("%.2f", total)));
-
-            int choice = JOptionPane.showConfirmDialog(
-                    this,
-                    receipt,
-                    "Confirm Booking",
-                    JOptionPane.OK_CANCEL_OPTION,
-                    JOptionPane.INFORMATION_MESSAGE
-            );
-
-            // ===== AFTER CONFIRM =====
-            if(choice == JOptionPane.OK_OPTION){
-
-                String bookingID = "BK" + System.currentTimeMillis();
-
-                SecureLogger.log("Booking confirmed: " + bookingID + " | " + car.getName());
-
-                JOptionPane.showMessageDialog(
-                        this,
-                        "✅ Booking Confirmed!\n\n" +
-                        "Car: " + car.getName() + "\n" +
-                        "Total Paid: $" + String.format("%.2f", total) + "\n" +
-                        "Booking ID: " + bookingID,
-                        "Success",
-                        JOptionPane.INFORMATION_MESSAGE
-                );
-            }
-
+        if (level >= 3) {
+            text = "GOOD COMFORT";
+            bg = new Color(22, 163, 74, 25);
+            fg = new Color(22, 163, 74);
+        } else if (level == 2) {
+            text = "MEDIUM COMFORT";
+            bg = new Color(234, 179, 8, 25);
+            fg = new Color(161, 98, 7);
+        } else {
+            text = "POOR COMFORT";
+            bg = new Color(220, 38, 38, 15);
+            fg = new Color(220, 38, 38);
         }
-        catch(Exception e){
 
-            JOptionPane.showMessageDialog(this,
-                    "❌ Please enter valid Days and Mileage");
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 4));
+        panel.setOpaque(true);
+        panel.setBackground(bg);
+        panel.setBorder(BorderFactory.createEmptyBorder(0, 2, 0, 8));
 
-        }
+        JLabel label = new JLabel("✨ " + text);
+        label.setFont(new Font("Segoe UI", Font.BOLD, 10));
+        label.setForeground(fg);
+
+        panel.add(label);
+        panel.setMaximumSize(new Dimension(165, 25));
+
+        return panel;
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        Graphics2D g2 = (Graphics2D) g.create();
+
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+        g2.setColor(new Color(0, 0, 0, 10));
+        g2.fillRoundRect(3, 3, getWidth() - 6, getHeight() - 6, ROUNDNESS, ROUNDNESS);
+
+        g2.setColor(Color.WHITE);
+        g2.fillRoundRect(0, 0, getWidth() - 4, getHeight() - 4, ROUNDNESS, ROUNDNESS);
+
+        g2.setColor(new Color(230, 235, 245));
+        g2.drawRoundRect(0, 0, getWidth() - 4, getHeight() - 4, ROUNDNESS, ROUNDNESS);
+
+        g2.dispose();
     }
 }

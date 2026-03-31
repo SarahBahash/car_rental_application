@@ -1,91 +1,136 @@
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.io.*;
 import java.util.List;
 
 public class AdminPanel extends JFrame {
 
-    JTextArea logArea = new JTextArea();
-    JTable carTable;
-    DefaultTableModel tableModel;
+    private JTable logsTable;
+    private JTable carsTable;
+    private JTable bookingsTable;
 
-    public AdminPanel(List<Car> cars){
+    private DefaultTableModel logsModel;
+    private DefaultTableModel carsModel;
+    private DefaultTableModel bookingsModel;
 
+    public AdminPanel(List<Car> cars) {
         setTitle("Admin Control Panel");
-        setSize(700,500);
+        setSize(850, 550);
+        setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
         JTabbedPane tabs = new JTabbedPane();
 
-        // ===== LOG PANEL =====
-        JPanel logPanel = new JPanel(new BorderLayout());
+        tabs.add("Security Logs", createLogsPanel());
+        tabs.add("Cars List", createCarsPanel(cars));
+        tabs.add("Bookings List", createBookingsPanel());
 
-        logArea.setEditable(false);
-
-        JButton loadLogs = new JButton("Load Security Logs");
-
-        loadLogs.addActionListener(e -> loadLogs());
-
-        logPanel.add(new JScrollPane(logArea),BorderLayout.CENTER);
-        logPanel.add(loadLogs,BorderLayout.SOUTH);
-
-        // ===== CAR PANEL =====
-        JPanel carPanel = new JPanel(new BorderLayout());
-
-        tableModel = new DefaultTableModel();
-
-        tableModel.addColumn("Car");
-        tableModel.addColumn("Category");
-        tableModel.addColumn("Passengers");
-        tableModel.addColumn("Comfort");
-
-        carTable = new JTable(tableModel);
-
-        loadCars(cars);
-
-        carPanel.add(new JScrollPane(carTable),BorderLayout.CENTER);
-
-        // ===== ADD TABS =====
-        tabs.add("Security Logs", logPanel);
-        tabs.add("Cars List", carPanel);
-
-        add(tabs,BorderLayout.CENTER);
+        add(tabs, BorderLayout.CENTER);
 
         setVisible(true);
     }
 
-    // ===== LOAD LOGS =====
-    private void loadLogs(){
+    // Displays security events stored in the database
+    private JPanel createLogsPanel() {
+        JPanel panel = new JPanel(new BorderLayout());
 
-        try{
+        logsModel = new DefaultTableModel();
+        logsModel.addColumn("Time");
+        logsModel.addColumn("User");
+        logsModel.addColumn("Action");
 
-            BufferedReader reader =
-                    new BufferedReader(new FileReader("security_log.txt"));
+        logsTable = new JTable(logsModel);
+        loadLogs();
 
-            logArea.read(reader,null);
+        JButton refreshButton = new JButton("Refresh Logs");
+        refreshButton.addActionListener(e -> loadLogs());
 
-        }
-        catch(Exception e){
+        panel.add(new JScrollPane(logsTable), BorderLayout.CENTER);
+        panel.add(refreshButton, BorderLayout.SOUTH);
 
-            logArea.setText("No logs available");
+        return panel;
+    }
 
+    // Displays all available cars in the system
+    private JPanel createCarsPanel(List<Car> cars) {
+        JPanel panel = new JPanel(new BorderLayout());
+
+        carsModel = new DefaultTableModel();
+        carsModel.addColumn("Car");
+        carsModel.addColumn("Category");
+        carsModel.addColumn("Passengers");
+        carsModel.addColumn("Comfort");
+        carsModel.addColumn("Type");
+
+        carsTable = new JTable(carsModel);
+        loadCars(cars);
+
+        panel.add(new JScrollPane(carsTable), BorderLayout.CENTER);
+
+        return panel;
+    }
+
+    // Displays confirmed bookings
+    private JPanel createBookingsPanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+
+        bookingsModel = new DefaultTableModel();
+        bookingsModel.addColumn("Booking ID");
+        bookingsModel.addColumn("Username");
+        bookingsModel.addColumn("Car");
+        bookingsModel.addColumn("Total Price");
+
+        bookingsTable = new JTable(bookingsModel);
+        loadBookings();
+
+        JButton refreshButton = new JButton("Refresh Bookings");
+        refreshButton.addActionListener(e -> loadBookings());
+
+        panel.add(new JScrollPane(bookingsTable), BorderLayout.CENTER);
+        panel.add(refreshButton, BorderLayout.SOUTH);
+
+        return panel;
+    }
+
+    private void loadLogs() {
+        logsModel.setRowCount(0);
+
+        List<String[]> logs = DatabaseManager.getAllLogs();
+        for (String[] log : logs) {
+            logsModel.addRow(log);
         }
     }
 
-    // ===== LOAD CARS =====
-    private void loadCars(List<Car> cars){
+    private void loadCars(List<Car> cars) {
+        carsModel.setRowCount(0);
 
-        tableModel.setRowCount(0);
-
-        for(Car car : cars){
-
-            tableModel.addRow(new Object[]{
+        for (Car car : cars) {
+            carsModel.addRow(new Object[]{
                     car.getName(),
                     car.getCategory(),
                     car.getMaxPassengers(),
-                    car.getComfortLevel()
+                    getComfortText(car.getComfortLevel()),
+                    car.getType()
             });
+        }
+    }
+
+    private void loadBookings() {
+        bookingsModel.setRowCount(0);
+
+        List<String[]> bookings = DatabaseManager.getAllBookings();
+        for (String[] booking : bookings) {
+            bookingsModel.addRow(booking);
+        }
+    }
+
+    private String getComfortText(int comfortLevel) {
+        if (comfortLevel >= 3) {
+            return "Good";
+        } else if (comfortLevel == 2) {
+            return "Medium";
+        } else {
+            return "Poor";
         }
     }
 }

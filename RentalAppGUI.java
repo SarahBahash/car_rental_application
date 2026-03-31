@@ -1,363 +1,223 @@
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.util.*;
-
-import javax.swing.table.DefaultTableModel;
-
 import java.util.List;
 import java.util.ArrayList;
-
-
+import java.util.Comparator;
 
 public class RentalAppGUI extends JFrame {
 
-    JTextField passengersField = new JTextField();
-    JTextField daysField = new JTextField();
-    JTextField mileageField = new JTextField();
+    private JTextField passengersField, daysField, mileageField;
+    private JPanel carsPanel;
+    private boolean isAdmin;
+    private String currentUser;
+    private List<Car> cars = new ArrayList<>();
 
-    JPanel carsPanel;
-    boolean isAdmin;
+    private final Color SIDEBAR_DARK = new Color(15, 23, 42);
+    private final Color ACCENT_ORANGE = new Color(249, 115, 22);
+    private final Color BG_BODY = new Color(241, 245, 249);
 
-    java.util.List<Car> cars = new ArrayList<>();
-
-    public RentalAppGUI(boolean admin){
+    public RentalAppGUI(boolean admin, String user) {
         this.isAdmin = admin;
+        this.currentUser = user;
 
-        setTitle("Car Rental Dashboard");
-        setSize(1100,650);
+        setTitle("Elite Car Rental - Dashboard");
+        setSize(1250, 850);
         setLayout(new BorderLayout());
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-
-        getContentPane().setBackground(new Color(235,245,255));
+        setLocationRelativeTo(null);
 
         createHeader();
         createSidebar();
         createCarsPanel();
 
-        initializeCars();
+        loadDataFromDatabase();
         displayCars();
 
         setVisible(true);
     }
 
-    private void createHeader(){
-
-    JPanel header = new JPanel(new BorderLayout());
-
-    header.setBackground(new Color(25,90,180));
-    header.setPreferredSize(new Dimension(100,70));
-
-    JLabel title = new JLabel(" CAR RENTAL SYSTEM");
-    title.setForeground(Color.WHITE);
-    title.setFont(new Font("Segoe UI",Font.BOLD,26));
-
-    JPanel rightPanel = new JPanel();
-    rightPanel.setBackground(new Color(25,90,180));
-
-    if(isAdmin){
-
-        JButton adminBtn = new JButton("Admin Panel");
-
-        adminBtn.addActionListener(e -> new AdminPanel(cars));
-
-        rightPanel.add(adminBtn);
+    // Load all cars from database
+    private void loadDataFromDatabase() {
+        this.cars = DatabaseManager.getAllCars();
     }
 
-    JButton logout = new JButton("Logout");
+    // Create the top header section
+    private void createHeader() {
+        JPanel header = new JPanel(new BorderLayout());
+        header.setBackground(Color.WHITE);
+        header.setPreferredSize(new Dimension(100, 70));
 
-    logout.addActionListener(e -> {
+        JLabel title = new JLabel("   DRIVE ELITE SYSTEM");
+        title.setFont(new Font("Segoe UI", Font.BOLD, 22));
+        title.setForeground(SIDEBAR_DARK);
 
-        dispose();
-        new LoginWindow();
+        JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 15));
+        rightPanel.setOpaque(false);
 
-    });
-
-    rightPanel.add(logout);
-
-    header.add(title,BorderLayout.WEST);
-    header.add(rightPanel,BorderLayout.EAST);
-
-    add(header,BorderLayout.NORTH);
-}
-
-    private void createSidebar(){
-
-        JPanel sidebar = new JPanel();
-
-        sidebar.setLayout(new GridLayout(10,1,10,10));
-        sidebar.setBackground(new Color(210,225,250));
-        sidebar.setPreferredSize(new Dimension(220,600));
-
-        sidebar.setBorder(BorderFactory.createEmptyBorder(20,20,20,20));
-
-        JLabel label1 = new JLabel("Passengers");
-        JLabel label2 = new JLabel("Days");
-        JLabel label3 = new JLabel("Mileage");
-
-        JButton search = new JButton("Find Best Car");
-
-        search.setBackground(new Color(40,120,220));
-        search.setForeground(Color.WHITE);
-
-        search.addActionListener(e -> filterCars());
-
-        sidebar.add(label1);
-        sidebar.add(passengersField);
-
-        sidebar.add(label2);
-        sidebar.add(daysField);
-
-        sidebar.add(label3);
-        sidebar.add(mileageField);
-
-        sidebar.add(search);
-
-        add(sidebar,BorderLayout.WEST);
-    }
-
-    private void createCarsPanel(){
-
-        carsPanel = new JPanel();
-
-        carsPanel.setLayout(new FlowLayout(FlowLayout.LEFT,20,20));
-        carsPanel.setBackground(new Color(235,245,255));
-        
-
-        JScrollPane scroll = new JScrollPane(carsPanel);
-        scroll.getVerticalScrollBar().setUnitIncrement(16);
-
-        add(scroll,BorderLayout.CENTER);
-    }
-
-    private void initializeCars(){
-
-        cars.add(new Car("2026 Honda CR-V","SUV",5,3,55,29,"images/crv.jpg"));
-        cars.add(new Car("2024 Ford Edge","Crossover",5,3,55,22,"images/edge.jpg"));
-        cars.add(new Car("2026 Honda Accord","Sedan",4,2,50,32,"images/accord.jpeg"));
-        cars.add(new Car("2026 Ford F150","Truck",5,3,55,17.5,"images/f150.jpg"));
-        cars.add(new Car("Chevrolet Corvette","Coupe",2,1,45,16.5,"images/corvette.jpg"));
-        cars.add(new Car("Lexus RX Hybrid","Hybrid",5,2,60,30,"images/rx.jpg"));
-        cars.add(new Car("Toyota Sienna","Minivan",7,2,70,36,"images/sienna.jpg"));
-    }
-
-    private void displayCars(){
-
-        carsPanel.removeAll();
-
-        for(Car car : cars){
-
-            carsPanel.add(createCarCard(car));
-
+        if (isAdmin) {
+            JButton adminBtn = createStyledButton("ADMIN PANEL", new Color(30, 58, 138), Color.WHITE);
+            adminBtn.addActionListener(e -> {
+                DatabaseManager.insertLog(currentUser, "Opened admin panel");
+                new AdminPanel(cars);
+            });
+            rightPanel.add(adminBtn);
         }
 
-        carsPanel.revalidate();
-        carsPanel.repaint();
-    }
-
-    private JPanel createCarCard(Car car){
-
-        JPanel card = new JPanel();
-
-        card.setPreferredSize(new Dimension(230,320));
-        card.setLayout(new BorderLayout());
-        card.setBackground(Color.WHITE);
-        card.setBorder(BorderFactory.createLineBorder(new Color(180,200,230)));
-
-        card.addMouseListener(new MouseAdapter(){
-
-            public void mouseEntered(MouseEvent e){
-
-                card.setBorder(BorderFactory.createLineBorder(new Color(40,120,220),2));
-
-            }
-
-            public void mouseExited(MouseEvent e){
-
-                card.setBorder(BorderFactory.createLineBorder(new Color(180,200,230)));
-
-            }
-
+        JButton logout = createStyledButton("LOGOUT", new Color(220, 38, 38), Color.WHITE);
+        logout.addActionListener(e -> {
+            dispose();
+            new LoginWindow();
         });
 
-        JLabel title = new JLabel(car.getName(),JLabel.CENTER);
-        title.setFont(new Font("Segoe UI",Font.BOLD,14));
+        rightPanel.add(logout);
 
-        ImageIcon icon = new ImageIcon(car.getImagePath());
-        Image img = icon.getImage().getScaledInstance(200,120,Image.SCALE_SMOOTH);
+        header.add(title, BorderLayout.WEST);
+        header.add(rightPanel, BorderLayout.EAST);
 
-        JLabel image = new JLabel(new ImageIcon(img));
-        image.setHorizontalAlignment(JLabel.CENTER);
-
-        JPanel info = new JPanel();
-        info.setLayout(new GridLayout(4,1));
-
-        info.add(new JLabel("Category: "+car.getCategory()));
-        info.add(new JLabel("Passengers: "+car.getMaxPassengers()));
-
-        info.add(createSeatVisualization(car.getMaxPassengers()));
-
-        JButton select = new JButton("Select");
-
-        select.setBackground(new Color(40,120,220));
-        select.setForeground(Color.WHITE);
-
-        select.addActionListener(e -> showReceipt(car));
-
-        info.add(select);
-
-        card.add(title,BorderLayout.NORTH);
-        card.add(image,BorderLayout.CENTER);
-        card.add(info,BorderLayout.SOUTH);
-
-        return card;
+        add(header, BorderLayout.NORTH);
     }
 
-    private JPanel createSeatVisualization(int passengers){
+    // Create sidebar inputs
+    private void createSidebar() {
+        JPanel sidebar = new JPanel();
+        sidebar.setLayout(new BoxLayout(sidebar, BoxLayout.Y_AXIS));
+        sidebar.setBackground(SIDEBAR_DARK);
+        sidebar.setPreferredSize(new Dimension(300, 0));
+        sidebar.setBorder(new EmptyBorder(30, 20, 30, 20));
 
-        JPanel seats = new JPanel(new GridLayout(2,4,3,3));
+        sidebar.add(createInputLabel("Number of Passengers:"));
+        passengersField = createStyledTextField();
+        sidebar.add(passengersField);
 
-        seats.setBackground(Color.WHITE);
+        sidebar.add(createInputLabel("Rental Duration (Days):"));
+        daysField = createStyledTextField();
+        sidebar.add(daysField);
 
-        for(int i=0;i<passengers;i++){
+        sidebar.add(createInputLabel("Estimated Mileage:"));
+        mileageField = createStyledTextField();
+        sidebar.add(mileageField);
 
-            JLabel seat = new JLabel("●",JLabel.CENTER);
-            seat.setForeground(new Color(40,120,220));
-            seats.add(seat);
+        JButton search = createStyledButton("SEARCH VEHICLES", ACCENT_ORANGE, Color.BLACK);
+        search.addActionListener(e -> filterCars());
 
-        }
+        sidebar.add(Box.createRigidArea(new Dimension(0, 20)));
+        sidebar.add(search);
 
-        for(int i=passengers;i<8;i++){
-
-            seats.add(new JLabel(""));
-
-        }
-
-        return seats;
+        add(sidebar, BorderLayout.WEST);
     }
 
-    private void showCarDetails(Car car){
+    private void createCarsPanel() {
+        carsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 30, 30));
+        carsPanel.setBackground(BG_BODY);
 
-        String message =
-                "Car: "+car.getName()+"\n"+
-                "Category: "+car.getCategory()+"\n"+
-                "Passengers: "+car.getMaxPassengers()+"\n"+
-                "Comfort Level: "+car.getComfortLevel();
-
-        JOptionPane.showMessageDialog(this,message);
+        JScrollPane scroll = new JScrollPane(carsPanel);
+        scroll.setBorder(null);
+        add(scroll, BorderLayout.CENTER);
     }
-    private void showReceipt(Car car){
 
-    try{
-
-        int days = SecurityValidator.validateDays(
-                Integer.parseInt(daysField.getText()));
-
-        double mileage = SecurityValidator.validateMileage(
-                Double.parseDouble(mileageField.getText()));
-
-        double gasPrice = 2.25;
-
-        double rental = car.rentalCost(days);
-        double gas = car.gasCost(mileage, gasPrice);
-        double total = rental + gas;
-
-        JPanel receipt = new JPanel(new GridLayout(12,1,5,5));
-
-        receipt.add(new JLabel("🚗 Car: " + car.getName()));
-        receipt.add(new JLabel("Category: " + car.getCategory()));
-        receipt.add(new JLabel("Passengers: " + car.getMaxPassengers()));
-
-        receipt.add(new JLabel("-----------------------------"));
-
-        receipt.add(new JLabel("Days: " + days));
-        receipt.add(new JLabel("Mileage: " + mileage + " miles"));
-        receipt.add(new JLabel("Price/Day: $" + car.rentalCost(1)));
-
-        receipt.add(new JLabel("-----------------------------"));
-
-        receipt.add(new JLabel("Rental Cost: $" + String.format("%.2f", rental)));
-        receipt.add(new JLabel("Fuel Cost: $" + String.format("%.2f", gas)));
-
-        receipt.add(new JLabel("-----------------------------"));
-
-        receipt.add(new JLabel("TOTAL: $" + String.format("%.2f", total)));
-
-        int choice = JOptionPane.showConfirmDialog(
-                this,
-                receipt,
-                "Confirm Booking",
-                JOptionPane.OK_CANCEL_OPTION,
-                JOptionPane.INFORMATION_MESSAGE
-        );
-
-        if(choice == JOptionPane.OK_OPTION){
-
-            String bookingID = "BK" + System.currentTimeMillis();
-
-            SecureLogger.log("Booking confirmed: " + bookingID + " | " + car.getName());
-
-            JOptionPane.showMessageDialog(
-                    this,
-                    "✅ Booking Confirmed!\n\n" +
-                    "Car: " + car.getName() + "\n" +
-                    "Total Paid: $" + String.format("%.2f", total) + "\n" +
-                    "Booking ID: " + bookingID,
-                    "Success",
-                    JOptionPane.INFORMATION_MESSAGE
-            );
-        }
-
+    private JLabel createInputLabel(String text) {
+        JLabel label = new JLabel(text);
+        label.setForeground(Color.LIGHT_GRAY);
+        label.setBorder(new EmptyBorder(10, 0, 5, 0));
+        return label;
     }
-    catch(Exception e){
 
-        JOptionPane.showMessageDialog(this,
-                "❌ Please enter valid Days and Mileage");
-
+    private JTextField createStyledTextField() {
+        JTextField field = new JTextField();
+        field.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+        field.setBorder(new LineBorder(Color.GRAY));
+        return field;
     }
-}
 
-    private void filterCars(){
+    private JButton createStyledButton(String text, Color bg, Color fg) {
+        JButton btn = new JButton(text);
+        btn.setBackground(bg);
+        btn.setForeground(fg);
+        return btn;
+    }
 
-    try{
-
-        int passengers = SecurityValidator.validatePassengers(
-                Integer.parseInt(passengersField.getText()));
-
-        int days = SecurityValidator.validateDays(
-                Integer.parseInt(daysField.getText()));
-
-        double mileage = SecurityValidator.validateMileage(
-                Double.parseDouble(mileageField.getText()));
-
-        List<Car> bestCars =
-                RentalCalculator.findBestCar(cars, passengers, days, mileage);
-
-        if(bestCars.isEmpty()){
-
-            JOptionPane.showMessageDialog(this,
-                    "No cars available for this passenger number");
-
-            return;
-        }
-
+    // Display all cars initially sorted by daily price then comfort
+    private void displayCars() {
         carsPanel.removeAll();
 
-        for(Car car : bestCars){
+        cars.sort(Comparator.comparingDouble(Car::getPriceDay)
+                .thenComparing(Comparator.comparingInt(Car::getComfortLevel).reversed()));
 
-            carsPanel.add(createCarCard(car));
-
+        for (Car car : cars) {
+            carsPanel.add(new CarCard(car, 0.0, e -> showReceipt(car)));
         }
 
         carsPanel.revalidate();
         carsPanel.repaint();
-
     }
-    catch(Exception e){
 
-        JOptionPane.showMessageDialog(this,e.getMessage());
+    // Filter cars using secure input validation
+    private void filterCars() {
+        try {
+            int passengers = SecurityValidator.validatePassengers(
+                    Integer.parseInt(passengersField.getText()));
 
+            int days = SecurityValidator.validateDays(
+                    Integer.parseInt(daysField.getText()));
+
+            double mileage = SecurityValidator.validateMileage(
+                    Double.parseDouble(mileageField.getText()));
+
+            carsPanel.removeAll();
+
+            List<Car> bestCars = RentalCalculator.findBestCar(cars, passengers, days, mileage);
+
+            for (Car car : bestCars) {
+                double tripCost = car.totalCost(days, mileage, 2.25);
+                carsPanel.add(new CarCard(car, tripCost, e -> showReceipt(car)));
+            }
+
+            carsPanel.revalidate();
+            carsPanel.repaint();
+
+            if (bestCars.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "No vehicles found.");
+            }
+
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Please enter valid numbers.");
+        } catch (IllegalArgumentException e) {
+            JOptionPane.showMessageDialog(this, e.getMessage());
+        }
     }
-}
+
+    // Show booking confirmation and validate input again before saving
+    private void showReceipt(Car car) {
+        try {
+            int days = SecurityValidator.validateDays(
+                    Integer.parseInt(daysField.getText()));
+
+            double mileage = SecurityValidator.validateMileage(
+                    Double.parseDouble(mileageField.getText()));
+
+            double total = car.totalCost(days, mileage, 2.25);
+
+            String receipt = "Vehicle: " + car.getName() +
+                    "\nTotal Cost: $" + String.format("%.2f", total) +
+                    "\nConfirm booking?";
+
+            int choice = JOptionPane.showConfirmDialog(this, receipt);
+
+            if (choice == JOptionPane.YES_OPTION) {
+                String bookingId = "BK" + System.currentTimeMillis();
+
+                DatabaseManager.insertBooking(bookingId, currentUser, car.getName(), total);
+                DatabaseManager.insertLog(currentUser, "Booked car: " + car.getName());
+
+                JOptionPane.showMessageDialog(this, "Booking Confirmed!");
+            }
+
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Please enter valid numbers.");
+        } catch (IllegalArgumentException e) {
+            JOptionPane.showMessageDialog(this, e.getMessage());
+        }
+    }
 }

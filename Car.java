@@ -7,9 +7,12 @@ public class Car {
     private double pricePerDay;
     private double mpg;
     private String imagePath;
+    private String type; // Hierarchical type (Economy, Standard, etc.)
 
+    // Constructor
     public Car(String name, String category, int maxPassengers,
-               int comfortLevel, double pricePerDay, double mpg, String imagePath){
+               int comfortLevel, double pricePerDay, double mpg,
+               String imagePath, String type) {
 
         this.name = name;
         this.category = category;
@@ -18,23 +21,31 @@ public class Car {
         this.pricePerDay = pricePerDay;
         this.mpg = mpg;
         this.imagePath = imagePath;
+        this.type = type;
     }
 
-    public double rentalCost(int days){
+    // Calculates rental cost based on number of days
+    public double rentalCost(int days) {
         return days * pricePerDay;
     }
 
-    public double gasCost(double mileage,double gasPrice){
+    // Calculates fuel cost based on mileage and gas price
+    public double gasCost(double mileage, double gasPrice) {
         return (mileage / mpg) * gasPrice;
     }
 
-    public double totalCost(int days,double mileage,double gasPrice){
-        return rentalCost(days) + gasCost(mileage,gasPrice);
+    // Calculates total trip cost (rental + fuel)
+    public double totalCost(int days, double mileage, double gasPrice) {
+        return rentalCost(days) + gasCost(mileage, gasPrice);
     }
 
-    public String getName(){ return name; }
-    public String getCategory(){ return category; }
-    public int getMaxPassengers(){ return maxPassengers; }
-    public int getComfortLevel(){ return comfortLevel; }
-    public String getImagePath(){ return imagePath; }
+    // Getters
+    public String getName() { return name; }
+    public String getCategory() { return category; }
+    public int getMaxPassengers() { return maxPassengers; }
+    public int getComfortLevel() { return comfortLevel; }
+    public String getImagePath() { return imagePath; }
+    public double getPriceDay() { return pricePerDay; }
+    public double getMpg() { return mpg; }
+    public String getType() { return type; }
 }
