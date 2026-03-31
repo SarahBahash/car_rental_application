@@ -4,8 +4,7 @@ import java.util.List;
 
 public class DatabaseManager {
 
-    private static final String URL = "jdbc:sqlite:car_rental_application/car_rental.db";
-
+    private static final String URL = "jdbc:sqlite:C:/Users/sarah/OneDrive/Desktop/car_rental_application/car_rental.db";
     // Loads all cars from the database
     public static List<Car> getAllCars() {
         List<Car> cars = new ArrayList<>();

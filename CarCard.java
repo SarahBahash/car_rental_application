@@ -2,7 +2,9 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
 import java.io.File;
+import javax.imageio.ImageIO;
 
 public class CarCard extends JPanel {
 
@@ -21,11 +23,12 @@ public class CarCard extends JPanel {
         // --- Image Section ---
         JLabel imgLabel = new JLabel();
         try {
-            ImageIcon icon = new ImageIcon(new File(car.getImagePath()).getAbsolutePath());
-            Image img = icon.getImage().getScaledInstance(280, 145, Image.SCALE_SMOOTH);
+            File imgFile = new File(car.getImagePath());
+            BufferedImage buffered = ImageIO.read(imgFile);
+            Image img = buffered.getScaledInstance(280, 145, Image.SCALE_SMOOTH);
             imgLabel.setIcon(new ImageIcon(img));
         } catch (Exception e) {
-            imgLabel.setText("📷 No Image Found");
+            imgLabel.setText("No Image Found");
         }
         imgLabel.setHorizontalAlignment(JLabel.CENTER);
         add(imgLabel, BorderLayout.NORTH);
