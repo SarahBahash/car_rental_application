@@ -23,7 +23,7 @@ public class CarCard extends JPanel {
         // --- Image Section ---
         JLabel imgLabel = new JLabel();
         try {
-            File imgFile = new File(car.getImagePath());
+            File imgFile = new File(System.getProperty("user.dir") + "/images/" + new File(car.getImagePath()).getName());
             BufferedImage buffered = ImageIO.read(imgFile);
             Image img = buffered.getScaledInstance(280, 145, Image.SCALE_SMOOTH);
             imgLabel.setIcon(new ImageIcon(img));
