@@ -42,7 +42,7 @@ public class DatabaseManager {
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setString(1, username);
-            pstmt.setString(2, password);
+            pstmt.setString(2, PasswordUtil.hashPassword(password));
 
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
@@ -83,7 +83,7 @@ public class DatabaseManager {
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setString(1, username);
-            pstmt.setString(2, password);
+            pstmt.setString(2, PasswordUtil.hashPassword(password));
 
             return pstmt.executeUpdate() > 0;
 
